@@ -12,23 +12,22 @@ function App() {
 
     const [items, setItems] = useState({});
     const [cart, setCart] = useState({});
+    const [purchaseSuccess, setPurchaseSuccess] = useState("");
 
     const addItem = (item) => {
-        axios.delete("http://localhost:3000/items/" + item).then((res) => {
-            if (items[item] > 0) {
-                setCart({ ...cart, [item]: (cart[item] || 0) + 1 });
-                console.log(cart);
-            }
-        });
+        if (items[item] > 0) {
+            setCart({ ...cart, [item]: (cart[item] || 0) + 1 });
+            setItems({ ...items, [item]: items[item] - 1 });
+            console.log(cart);
+        }
     };
 
     const removeItem = (item) => {
-        axios.put("http://localhost:3000/items/" + item).then((res) => {
-            if (cart[item] && cart[item] > 0) {
-                setCart({ ...cart, [item]: cart[item] - 1 });
-                console.log(cart);
-            }
-        });
+        if (cart[item] && cart[item] > 0) {
+            setCart({ ...cart, [item]: cart[item] - 1 });
+            setItems({ ...items, [item]: items[item] + 1 });
+            console.log(cart);
+        }
     };
 
     const getItems = async () => {
@@ -41,9 +40,19 @@ function App() {
         }
     };
 
+    const purchaseItems = async () => {
+        try {
+            setPurchaseSuccess((await axios.put("http://localhost:3000/items", items)) && true);
+            getItems();
+        } catch (e) {
+            setPurchaseSuccess(false);
+            console.log(e);
+        }
+    };
+
     useEffect(() => {
         getItems();
-    }, [cart]);
+    }, []);
 
     return (
         // JSX elements - React allows HTML to be written inside JS and calls this JSX elements
@@ -95,6 +104,24 @@ function App() {
                         : " items"}
                 </b>
             </fieldset>
+            <button onClick={() => purchaseItems()}>Checkout</button>
+            <dialog open={purchaseSuccess && purchaseSuccess !== ""}>
+                <div>
+                    {purchaseSuccess
+                        ? "Purchase successful. Please visit us again."
+                        : purchaseSuccess !== ""
+                        ? "Purchase unsuccessful. Contact IT team if occurs again. "
+                        : ""}
+                </div>
+                <button
+                    onClick={() => {
+                        setPurchaseSuccess("");
+                        setCart({});
+                    }}
+                >
+                    Close
+                </button>
+            </dialog>
         </div>
     );
 }

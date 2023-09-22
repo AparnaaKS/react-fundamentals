@@ -1,6 +1,6 @@
-# ECommerce - Basic
+# ECommerce - API
 
-A simple React app with only one component and some states in it.
+A simple React app with only one component that calls an API and has some states in it.
 
 ## Prerequisites
 

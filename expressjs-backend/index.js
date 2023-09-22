@@ -1,8 +1,8 @@
 const express = require("express");
 const app = express();
 const port = 3000;
-const fs = require("fs");
 var cors = require("cors");
+var bodyParser = require("body-parser");
 
 var corsOptions = {
     origin: "http://localhost",
@@ -11,7 +11,13 @@ var corsOptions = {
 
 app.use(cors());
 
-let items = JSON.parse(fs.readFileSync("items.json"));
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+let items = { Apples: 10, Mangoes: 10, Oranges: 10, Bags: 5 };
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
@@ -29,9 +35,12 @@ app.put("/items/:item", function (req, res) {
     try {
         let item = req.params.item;
         console.log("Item added");
-        if ((items[item] < 10 && item !== "Bags") || (items[item] < 5 && item === "Bags")) {
+        if (
+            items[item] === null ||
+            (items[item] < 10 && item !== "Bags") ||
+            (items[item] < 5 && item === "Bags")
+        ) {
             items = { ...items, [item]: items[item] + 1 };
-            fs.writeFileSync("items.json", JSON.stringify(items));
             res.send("Item added to inventory");
         }
     } catch (e) {
@@ -44,11 +53,21 @@ app.delete("/items/:item", function (req, res) {
         let item = req.params.item;
         console.log("Item bought/removed");
         if (items[item] && items[item] > 0) {
-            items = { ...items, [item]: items[item] - 1 };
-            fs.writeFileSync("items.json", JSON.stringify(items));
+            items = { ...items, [item]: items[item] > 1 ? items[item] - 1 : null };
             res.send("Item removed / bought");
         }
         res.send("Item not available");
+    } catch (e) {
+        res.send(e.toString());
+    }
+});
+
+app.put("/items", function (req, res) {
+    try {
+        console.log("Items bought/removed");
+        items = req.body;
+        console.log(items);
+        res.send(JSON.stringify(req.body));
     } catch (e) {
         res.send(e.toString());
     }
