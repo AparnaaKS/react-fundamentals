@@ -1,0 +1,22 @@
+body {
+    font-size: 1.1rem;
+}
+
+ul {
+    padding: 10px;
+    margin: 20px;
+}
+
+tr>td:first-child {
+    text-align: center;
+}
+
+td {
+    padding-left: 20px;
+    padding-top: 10px;
+}
+
+th {
+    font-weight: bolder;
+    border-bottom: 2px solid rgb(203, 201, 206);
+}
